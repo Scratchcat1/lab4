@@ -45,19 +45,24 @@ member val (Node c l x r)
 balance :: Colour -> Tree a -> a -> Tree a -> Tree a
 balance Black (Node Red (Node Red a x b) y c) z d =
     Node Red (Node Black a x b) y (Node Black c z d)
-balance Black (Node Red a y (Node Red b x c)) z d =
+balance Black (Node Red a x (Node Red b y c)) z d =
     Node Red (Node Black a x b) y (Node Black c z d)
-balance Black a z (Node Red (Node Red b x c) y d) =
+balance Black a x (Node Red (Node Red b y c) z d) =
     Node Red (Node Black a x b) y (Node Black c z d)
-balance Black a z (Node Red b y (Node Red c x d)) =
+balance Black a x (Node Red b y (Node Red c z d)) =
     Node Red (Node Black a x b) y (Node Black c z d)
 balance c l x r = Node c l x r
 
-insert :: Ord a => Tree a -> a -> Tree a
-insert Leaf val = (Node Red Leaf val Leaf)
-insert (Node c l x r) val
+insertHelper :: Ord a => Tree a -> a -> Tree a
+insertHelper Leaf val = (Node Red Leaf val Leaf)
+insertHelper (Node c l x r) val
     | val == x = (Node c l x r)
-    | val <  x = (Node c (insert l val) x r)
-    | val >  x = (Node c l x (insert r val))
+    | val <  x = (balance c (insertHelper l val) x r)
+    | val >  x = (balance c l x (insertHelper r val))
+
+insert :: Ord a => Tree a -> a -> Tree a
+insert tree val = (Node Black l x r)
+    where
+        (Node _ l x r) = insertHelper tree val
 
 --------------------------------------------------------------------------------
